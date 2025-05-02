@@ -7,4 +7,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ManagerRepository extends MongoRepository<Manager, ObjectId> {
     Manager findByManagerName(String managerName);
+    void DeleteByManagerName(String managerName);
 }

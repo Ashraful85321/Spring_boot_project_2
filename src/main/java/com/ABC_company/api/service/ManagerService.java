@@ -32,10 +32,17 @@ public class ManagerService {
             currentManager.setManagerName(newManager.getManagerName());
             currentManager.setPassword(newManager.getPassword());
             managerRepository.save(currentManager);
+            return "Saved and done.";
         }
-          return "Saved and done.";
+          return "Could not find the manager.";
     }
     public void deleteManager(ObjectId pId){
         managerRepository.deleteById(pId);
+    }
+    public void deleteManager(String mName){
+        Manager manager = this.findByMName(mName);
+        if(manager != null){
+            managerRepository.DeleteByManagerName(mName);
+        }
     }
 }
