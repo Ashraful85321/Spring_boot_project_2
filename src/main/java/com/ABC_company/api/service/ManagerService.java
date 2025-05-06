@@ -42,7 +42,7 @@ public class ManagerService {
     public void deleteManager(String mName){
         Manager manager = this.findByMName(mName);
         if(manager != null){
-            managerRepository.DeleteByManagerName(mName);
+            managerRepository.deleteByManagerName(mName);
         }
     }
 }
