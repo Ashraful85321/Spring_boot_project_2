@@ -25,5 +25,6 @@ public class Manager {
     private String password;
     @DBRef
     private List<Person> supervisedPerson = new ArrayList<>();
+    private List<String> roles;
 
 }
