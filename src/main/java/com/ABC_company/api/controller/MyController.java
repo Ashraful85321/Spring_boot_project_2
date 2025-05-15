@@ -1,5 +1,6 @@
 package com.ABC_company.api.controller;
 
+import com.ABC_company.api.customExceptions.PersonNotFoundException;
 import com.ABC_company.api.entity.Person;
 import com.ABC_company.api.service.ManagerService;
 import com.ABC_company.api.service.PersonService;
@@ -7,6 +8,8 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +23,11 @@ public class MyController {
 private PersonService service;
 @Autowired
 private ManagerService mService;
-    @GetMapping("/{man}")
-    public ResponseEntity<?> getAllSupervised(@PathVariable String man){
+    @GetMapping
+    public ResponseEntity<?> getAllSupervised(){
 //        return new ArrayList<>(thePerson.values());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String man = auth.getName();
         List<Person> allPerson = service.getPersons(man);
         if(allPerson != null && !allPerson.isEmpty()){
             return new ResponseEntity<>(allPerson, HttpStatus.OK);
@@ -34,16 +39,20 @@ private ManagerService mService;
     public ResponseEntity<Person> getThePerson(@PathVariable ObjectId personId){
 //        return thePerson.get(personId);
 //        return service.getAPerson(personId).orElse(null);
-        Optional<Person> theResponse = service.getAPerson(personId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String mName = auth.getName();
+        Optional<Person> theResponse = service.getAPerson(personId, mName);
         if(theResponse.isPresent()){
             return new ResponseEntity<>(theResponse.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-    @PostMapping("/{man}")
-    public ResponseEntity<Person> createPerson(@RequestBody Person person, @PathVariable String man){
+    @PostMapping
+    public ResponseEntity<Person> createPerson(@RequestBody Person person){
 //        thePerson.put(person.getId(), person);
          try {
+             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+             String man = auth.getName();
              service.addPerson(person, man);
              return new ResponseEntity<>(person,HttpStatus.CREATED);
          }catch (Exception e){
@@ -52,23 +61,27 @@ private ManagerService mService;
 
     }
     @PutMapping("/id/{personId}")
-    public ResponseEntity<Person> updatePerson(@PathVariable ObjectId personId, @RequestBody Person person){
+    public ResponseEntity<?> updatePerson(@PathVariable ObjectId personId, @RequestBody Person person){
 //        thePerson.put(personId, person);
         try {
-            service.updatePerson(personId, person);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String mName = auth.getName();
+            service.updatePerson(personId, person, mName);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }catch (PersonNotFoundException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-    @DeleteMapping("/id/{personId}/{man}")
-    public ResponseEntity<Person> deletePerson(@PathVariable ObjectId personId, @PathVariable String man){
+    @DeleteMapping("/id/{personId}")
+    public ResponseEntity<?> deletePerson(@PathVariable ObjectId personId){
 //        thePerson.remove(personId);
         try {
-            service.deletePerson(personId, man);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String mName = auth.getName();
+            service.deletePerson(personId, mName);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }catch (Exception e){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }catch (IllegalStateException e){
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.NOT_FOUND);
         }
     }
 

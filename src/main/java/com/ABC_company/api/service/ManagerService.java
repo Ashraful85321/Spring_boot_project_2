@@ -4,7 +4,6 @@ import com.ABC_company.api.entity.Manager;
 import com.ABC_company.api.repo.ManagerRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,8 @@ public class ManagerService {
     @Autowired
     private ManagerRepository managerRepository;
 
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public void addManager(Manager manager){
         managerRepository.save(manager);
