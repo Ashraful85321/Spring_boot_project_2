@@ -4,6 +4,7 @@ import com.ABC_company.api.customExceptions.PersonNotFoundException;
 import com.ABC_company.api.entity.Manager;
 import com.ABC_company.api.entity.Person;
 import com.ABC_company.api.repo.PersonRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,14 +15,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class PersonService {
     @Autowired
     private PersonRepository personRepository;
     @Autowired
     private ManagerService mService;
 
+//    private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
+
     @Transactional
     public void addPerson(Person person, String man){
+
         //Add a new person
         person.setDate(LocalDateTime.now());
         Person savedPerson = personRepository.save(person);

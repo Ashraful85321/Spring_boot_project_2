@@ -2,13 +2,17 @@ package com.ABC_company.api.controller;
 
 import com.ABC_company.api.entity.Manager;
 import com.ABC_company.api.service.ManagerService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/manager")
+@Slf4j
 public class ManagerController {
     @Autowired
     private ManagerService managerService;
@@ -23,8 +27,15 @@ public class ManagerController {
 //        return managerService.getAManager(mId);
 //    }
     @PostMapping
-    public void addAManager(@RequestBody Manager manager){
-         managerService.addManager2(manager);
+    public ResponseEntity<Void> addAManager(@RequestBody Manager manager){
+        try {
+            managerService.addManager2(manager);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e){
+            log.error("Error occurred saving manager {} because {} ",manager.getManagerName(), e.getMessage());
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
     @PutMapping
     public String updateAManager(@RequestBody Manager manager){

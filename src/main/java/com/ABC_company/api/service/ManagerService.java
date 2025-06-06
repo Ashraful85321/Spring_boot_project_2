@@ -2,6 +2,7 @@ package com.ABC_company.api.service;
 
 import com.ABC_company.api.entity.Manager;
 import com.ABC_company.api.repo.ManagerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@Slf4j
 public class ManagerService {
+    private static final String APP_PACKAGE = "com.ABC_company.api";
     @Autowired
     private ManagerRepository managerRepository;
 
@@ -20,13 +23,38 @@ public class ManagerService {
     private PasswordEncoder passwordEncoder;
 
     public void addManager(Manager manager){
-        managerRepository.save(manager);
+        try {
+            managerRepository.save(manager);
+        }catch (Exception e){
+            log.error("Error saving manager {}",manager.getManagerName());
+        }
+
     }
     public void addManager2(Manager manager){
+        try {
+            manager.setPassword(passwordEncoder.encode(manager.getPassword()));
+            manager.setRoles(Arrays.asList("USER"));
+            managerRepository.save(manager);
+        }catch (Exception e){
+            StackTraceElement origin = Arrays.stream(e.getStackTrace())
+                    .filter(el -> el.getClassName().startsWith(APP_PACKAGE))
+                    .findFirst()
+                    .orElse(e.getStackTrace()[0]);
+            log.error("Error occurred at : {} : {} : {} : {}",
+                    origin.getFileName(),
+                    origin.getClassName(),
+                    origin.getMethodName(),
+                    e.getMessage() );
+            throw e;
+        }
+    }
+
+    public void addAdmin(Manager manager){
         manager.setPassword(passwordEncoder.encode(manager.getPassword()));
-        manager.setRoles(Arrays.asList("USER"));
+        manager.setRoles(Arrays.asList("USER", "ADMIN"));
         managerRepository.save(manager);
     }
+
     public List<Manager> getManager(){
         return managerRepository.findAll();
     }
