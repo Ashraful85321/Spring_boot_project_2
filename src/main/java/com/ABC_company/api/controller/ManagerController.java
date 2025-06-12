@@ -1,7 +1,9 @@
 package com.ABC_company.api.controller;
 
 import com.ABC_company.api.entity.Manager;
+import com.ABC_company.api.entity.WeatherResponse;
 import com.ABC_company.api.service.ManagerService;
+import com.ABC_company.api.service.WeatherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 public class ManagerController {
     @Autowired
     private ManagerService managerService;
+    @Autowired
+    private WeatherService weatherService;
 
 //    @GetMapping
 //    public List<Manager> getAllManager(){
@@ -49,5 +53,18 @@ public class ManagerController {
         String mName = auth.getName();
         managerService.deleteManager(mName);
         return "Deleted";
+    }
+
+    @GetMapping
+    public ResponseEntity<String> greetings(){
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        String mName = auth.getName();
+        WeatherResponse weather = weatherService.getWeather("Dhaka");
+        String msg = "";
+        if(weather != null){
+            msg = "The temperature is " + weather.getCurrent().getTemperature() + " feels like " + weather.getCurrent().getFeelsLike();
+        }
+//        return new ResponseEntity<>("Hello " + mName + msg, HttpStatus.OK);
+        return ResponseEntity.ok("Hello " + mName + msg);
     }
 }
